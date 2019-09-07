@@ -23,15 +23,8 @@ class MyntraCrawl(scrapy.Spider):
 
     def __init__(self):
          self.driver = webdriver.Firefox(options=options)
-         # self.wait = WebDriverWait(self.driver, 10)
     
     def parse(self, response):
-        """Callback funtion for scapy
-        Including a try except for selenium webdriver quit to avoid memory overflow and a graceful exit
-        
-        
-
-        """
         try:
             self.driver.get(response.url)
             mount_root = Selector(text = self.driver.page_source)
@@ -41,7 +34,6 @@ class MyntraCrawl(scrapy.Spider):
 
             for each_url in url_list:
                 url = urljoin(response.url, each_url)
-                # print("Getting to url:", url)
                 shoe_page = self.driver.get(url)
                 self.driver.execute_script("window.scrollTo(0, 1080)")
                 self.driver.find_element_by_xpath("//div[@class = 'index-showMoreText']").click()
@@ -49,7 +41,6 @@ class MyntraCrawl(scrapy.Spider):
                 shoe_urls  = _mount_root.xpath("//*[@class='image-grid-container common-clearfix']").re(r'url\("([^\")]+)')
                 row_keys = _mount_root.xpath("//*[@class = 'index-rowKey']/text()").getall()
                 row_values = _mount_root.xpath("//*[@class = 'index-rowValue']/text()").getall()
-
                 specifications = dict(zip(row_keys, row_values))
                 yield {
                     'title' : _mount_root.xpath("//h1[@class='pdp-title']/text()").get(),
@@ -76,15 +67,10 @@ class MyntraSpider(scrapy.Spider):
 
     def __init__(self):
          self.driver = webdriver.Firefox(options=options)
-       
     
     def parse(self, response):
         self.driver.get(response.url)
-        self.driver.execute_script("window.scrollTo(0, 1600)")
-
-        
-
-        
+        self.driver.execute_script("window.scrollTo(0, 1600)")        
         self.driver.find_element_by_xpath("//div[@class = 'index-showMoreText']").click()
         
         mount_root = Selector(text = self.driver.page_source)
@@ -92,12 +78,6 @@ class MyntraSpider(scrapy.Spider):
         row_keys = mount_root.xpath("//*[@class = 'index-rowKey']/text()").getall()
         row_values = mount_root.xpath("//*[@class = 'index-rowValue']/text()").getall()
         specifications = dict(zip(row_keys, row_values))
-        pprint(specifications)
-        # print(mount_root.xpath("//div[contains(@class, 'image-grid-col50')]//@style").re(r'url\("([^\")]+)'))
-        
-        # yield {
-        #     'urls': urls.xpath("//div[contains(@class, 'image-grid-image')]//@style").re(r'url\("([^\")]+)')
-        # }
 
     def __del__(self):
         self.driver.close()
